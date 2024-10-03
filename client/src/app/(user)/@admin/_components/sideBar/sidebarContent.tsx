@@ -18,7 +18,7 @@ export const SidebarContent = () => {
   useEffect(() => {}, [searchParams, router]);
 
   return (
-    <div className="h-screen bg-gray-500 overflow-y-auto w-full flex flex-col">
+    <div className="h-screen bg-blue-500 overflow-y-auto w-full flex flex-col">
       {/* Logo */}
       <div className="w-full">
         <div className="flex gap-2 justify-center items-center p-2 lg:p-3">

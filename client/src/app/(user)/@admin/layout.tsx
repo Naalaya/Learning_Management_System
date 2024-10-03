@@ -6,7 +6,7 @@ export default function StudentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-full flex">
+    <div className="h-screen w-full flex bg-green-100">
       <nav className="w-[14%] md:w-[10%] xl:w-[14%]">
         <SideBar />
       </nav>

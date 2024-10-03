@@ -24,6 +24,7 @@ class StudentSeeder extends Seeder
                 'code'          => "AC{$code}",
                 'password'      => bcrypt("AC{$code}"),
                 'name'          => fake('vi_VN')->firstName() . ' ' . fake('vi_VN')->lastName(),
+                'profile_id'    =>fake()->numerify('############'),
                 'email'         => fake()->safeEmail(),
                 'phone'         => fake()->numerify('09########'),
                 'avatar'        => $i == 1 || $i == 2 ? 'images/avatar/student-2.png' : null,

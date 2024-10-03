@@ -15,4 +15,10 @@ class Province extends Model
     protected $fillable = [
         'name',
     ];
+
+    // Scope
+    public function scopeSort($query, ?string $type = 'DESC')
+    {
+        return $query->orderBy('sort', $type);
+    }
 }

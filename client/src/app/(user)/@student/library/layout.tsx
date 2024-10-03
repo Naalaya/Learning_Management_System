@@ -1,6 +1,5 @@
 import RightSectionBar from "../../components/DashboardRightSectionBar";
 import Header from "../../components/header";
-import SideBar from "../../components/sideBar/sideBar";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
 
