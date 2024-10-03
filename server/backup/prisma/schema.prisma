@@ -1,0 +1,335 @@
+generator client {
+  provider = "prisma-client-js"
+}
+generator erd {
+  provider = "prisma-erd-generator"
+  output = "../ERD.pdf"
+  theme = "forest"
+
+}
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+enum Roles {
+  Admin
+  Teacher
+  Student
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+model User {
+  user_id        String   @id @default(auto()) @map("_id") @db.ObjectId 
+  user_name      String
+  image_url      String
+  gender         Gender
+  role           Roles
+  school_email   String      
+  personal_email String
+  contact_no     String
+  citizen_id     String   
+  ethnicity      String
+  date_of_birth  DateTime
+  faculty_id     String?  @db.ObjectId
+  faculty        Faculty? @relation(fields: [faculty_id], references: [faculty_id], onDelete: SetNull, onUpdate: Cascade)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  sessions       Session[]
+
+  account        Account?
+  teacher        Teacher?
+  student        Student?
+  admin          Admin?
+  notifications  Notification[]
+  change_history UserChangeHistory[]
+
+  @@index([user_id, user_name, image_url])
+  @@unique([school_email,citizen_id])
+}
+enum Notification {
+  change_history
+  notification_for_Class
+  system_notification
+}
+
+model Account {
+  user_id           String    @id @db.ObjectId  @map("_id") 
+  user              User      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  account_password  String
+  default_password  String        
+  is_locked         Boolean   @default(false)
+  last_login        DateTime?
+  password_reset_token String?
+  password_reset_expires DateTime?
+  //??
+  failed_login_attempts Int     @default(0)
+
+  last_password_change DateTime?
+}
+
+model Session {
+  session_id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id           String   @db.ObjectId
+  user              User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+
+  create_at         DateTime @default(now())
+  update_at         DateTime @updatedAt
+  login_time        DateTime @default(now())
+  last_activity     DateTime @default(now())
+  ip_address        String
+  device_info       String
+  is_active         Boolean  @default(true)
+  //token
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+}
+// model VerificationToken {
+//   id         String   @id @default(auto()) @map("_id") @db.ObjectId
+//   identifier String
+//   token      String
+//   expires    DateTime
+ 
+//   @@unique([identifier, token])
+// }
+ 
+model UserChangeHistory {
+  history_id  String   @id @default(auto()) @map("_id") @db.ObjectId
+  user_id     String   @db.ObjectId
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  field_name  String
+  old_value   String
+  new_value   String
+  changed_at  DateTime @default(now())
+  changed_by  String   @db.ObjectId
+}
+
+model Teacher {
+  user_id          String        @id @db.ObjectId  @map("_id")
+  user             User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  degree           String        
+  position         String        
+  courses          Course[]
+}
+
+model Student {
+  user_id          String                @id @db.ObjectId  @map("_id")
+  user             User                  @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: Cascade)
+  class_id         String                @db.ObjectId
+  class            Class                 @relation(fields: [class_id], references: [class_id], onDelete: Restrict, onUpdate: Cascade)
+  enrollments      Student_Enrollment[]
+  grades           Grade[]
+}
+
+model Admin {
+  user_id          String        @id @db.ObjectId  @map("_id")
+  user             User          @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Faculty {
+  faculty_id      String    @id @default(auto()) @map("_id") @db.ObjectId
+  faculty_name    String    
+  founded         DateTime  @default(now())
+  faculty_address String  
+  majors          Major[]   
+  users           User[]
+  
+  @@index([faculty_id, faculty_name])
+}
+
+model Major {
+  major_id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  major_name      String
+  founded         DateTime          @default(now())
+  faculty_id      String            @db.ObjectId
+  faculty         Faculty           @relation(fields: [faculty_id], references: [faculty_id], onDelete: Cascade, onUpdate: Cascade)
+  specializations Specialization[]
+@@index([major_id, major_name])
+}
+
+model Specialization {
+  specialization_id   String        @id @default(auto()) @map("_id") @db.ObjectId
+  specialization_name String
+  founded             DateTime      @default(now())
+  major_id            String        @db.ObjectId
+  major               Major         @relation(fields: [major_id], references: [major_id], onDelete: Cascade, onUpdate: Cascade)
+  classes             Class[]
+  courses             Course[]
+  @@index([specialization_id,specialization_name])
+}
+
+model Class {
+  class_id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  class_name        String
+  specialization_id String           @db.ObjectId
+  created_at        DateTime         @default(now())
+  specialization    Specialization   @relation(fields: [specialization_id], references: [specialization_id], onDelete: Cascade, onUpdate: Cascade)
+  students          Student[]
+  enrollments       Class_Enrollment[]
+  @@index([class_id,class_name])
+}
+
+model Course {
+  course_id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  course_name         String
+  created_at          DateTime           @default(now())
+  teacher_id          String             @db.ObjectId
+  lecturer            Teacher            @relation(fields: [teacher_id], references: [user_id], onDelete: NoAction, onUpdate: Cascade)
+  prerequired         String[]           @db.ObjectId
+  semester            Int                // 1, 2, 3 representing different semesters
+  credits             Int
+  is_complete         Boolean            @default(false)
+  status              Boolean            @default(false)
+  specialization_id   String             @db.ObjectId
+  specialization      Specialization     @relation(fields: [specialization_id], references: [specialization_id], onDelete: NoAction, onUpdate: NoAction)
+  class_enrollments   Class_Enrollment[]
+  materials           MaterialResource[]
+  grades              Grade[]
+  @@index([course_id,course_name])
+}
+
+model Class_Enrollment {
+  enroll_id       String           @id @default(auto()) @map("_id") @db.ObjectId 
+  class_id        String           @db.ObjectId
+  class           Class            @relation(fields: [class_id], references: [class_id], onDelete: Cascade, onUpdate: Cascade)
+  course_id       String           @db.ObjectId
+  course          Course           @relation(fields: [course_id], references: [course_id], onDelete: Restrict, onUpdate: Cascade)
+  students        Student_Enrollment[]
+  schedule        Schedule?
+}
+
+model Student_Enrollment {
+  id                  String           @id @default(auto()) @map("_id") @db.ObjectId
+  student_id          String           @db.ObjectId
+  enrollment_id       String           @db.ObjectId
+  student             Student          @relation(fields: [student_id], references: [user_id])
+  class_enrollment    Class_Enrollment @relation(fields: [enrollment_id], references: [enroll_id])
+}
+
+model Grade {
+  grade_id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  student_id        String   @db.ObjectId
+  course_id         String   @db.ObjectId
+  assignment_scores Float[]   // Store scores for assignments (4 columns, each 5%)
+  midterm_score     Float    // Score for midterm exam (30%)
+  final_score       Float    // Score for final exam (50%)
+  student           Student  @relation(fields: [student_id], references: [user_id])
+  course            Course   @relation(fields: [course_id], references: [course_id])
+  @@index([grade_id, assignment_scores, midterm_score,final_score])
+}
+
+// Tài liệu môn học 
+model MaterialResource {
+  resource_id String @id @default(auto()) @map("_id") @db.ObjectId
+  course_id   String @db.ObjectId
+  title       String
+  url         String
+  type        ResourceType
+  course      Course @relation(fields: [course_id], references: [course_id])
+}
+enum ResourceType {
+  dpf
+  video
+}
+
+model Schedule {
+  schedule_id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  enrollment_id      String           @unique @db.ObjectId
+  class_enrollment   Class_Enrollment @relation(fields: [enrollment_id], references: [enroll_id], onDelete: Cascade, onUpdate: Cascade)
+  day_of_week        Int
+  start_time         String
+  end_time           String
+  @@index([day_of_week,start_time,end_time])
+}
+
+
+
+
+
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+// generator erd {
+//   provider = "prisma-erd-generator"
+//   output = "../ERD.pdf"
+//   theme = "forest"
+
+// }
+// datasource db {
+//   provider = "mongodb"
+//   url      = env("DATABASE_URL_TEST")
+// }
+
+// model User {
+//   id            String          @id @default(auto()) @map("_id") @db.ObjectId
+//   name          String?
+//   email         String?         @unique
+//   emailVerified DateTime?
+//   image         String?
+//   accounts      Account[]
+//   sessions      Session[]
+//   // Optional for WebAuthn support
+//   Authenticator Authenticator[]
+ 
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+// model Account {
+//   id                String  @id @default(auto()) @map("_id") @db.ObjectId
+//   userId            String  @db.ObjectId
+//   type              String
+//   provider          String
+//   providerAccountId String
+//   refresh_token     String? @db.String
+//   access_token      String? @db.String
+//   expires_at        Int?
+//   token_type        String?
+//   scope             String?
+//   id_token          String? @db.String
+//   session_state     String?
+ 
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+ 
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+//   @@unique([provider, providerAccountId])
+// }
+ 
+// model Session {
+//   id           String   @id @default(auto()) @map("_id") @db.ObjectId
+//   sessionToken String   @unique
+//   userId       String   @db.ObjectId
+//   expires      DateTime
+//   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+ 
+
+// // Optional for WebAuthn support
+// model Authenticator {
+//   credentialID         String  @id @map("_id")
+//   userId               String  @db.ObjectId
+//   providerAccountId    String
+//   credentialPublicKey  String
+//   counter              Int
+//   credentialDeviceType String
+//   credentialBackedUp   Boolean
+//   transports           String?
+ 
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+//   @@unique([userId, credentialID])
+// }

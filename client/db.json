@@ -1,0 +1,112 @@
+{
+  "users": [
+    {
+      "user_id": "2151013004",
+      "user_name": "JohnDoe",
+      "image_url": "https://example.com/images/johndoe.jpg",
+      "gender": "Male",
+      "role": "Teacher",
+      "school_email": "johndoe@school.edu",
+      "personal_email": "johndoe@gmail.com",
+      "contact_no": "0123456789",
+      "citizen_id": "123456789012",
+      "ethnicity": "Asian",
+      "date_of_birth": "1985-05-20T00:00:00.000Z",
+      "faculty_id": "64fb2f4e7f83b49d4a5e8dba",
+      "created_at": "2024-08-10T10:30:00.000Z",
+      "updated_at": "2024-08-20T10:30:00.000Z",
+      "sessions": [],
+      "account": {
+        "user_id": "2151013004",
+        "account_password": "123456",
+        "default_password": "temp_password_123",
+        "is_locked": false,
+        "last_login": "2024-08-10T10:30:00.000Z",
+        "failed_login_attempts": 0
+      },
+      "teacher": {
+        "user_id": "2151013004",
+        "degree": "PhD",
+        "position": "Lecturer",
+        "courses": []
+      },
+      "notifications": [],
+      "change_history": [],
+      "tokens": {
+        "accessToken": null,
+        "refreshToken": null
+      }
+    },
+    {
+      "user_id": "anptdt2003",
+      "user_name": "JaneSmith",
+      "image_url": "https://example.com/images/janesmith.jpg",
+      "gender": "Female",
+      "role": "Student",
+      "school_email": "janesmith@school.edu",
+      "personal_email": "janesmith@gmail.com",
+      "contact_no": "0987654321",
+      "citizen_id": "987654321098",
+      "ethnicity": "Caucasian",
+      "date_of_birth": "2000-11-15T00:00:00.000Z",
+      "faculty_id": "64fb2f4e7f83b49d4a5e8dbb",
+      "created_at": "2024-08-15T12:00:00.000Z",
+      "updated_at": "2024-08-21T12:00:00.000Z",
+      "sessions": [],
+      "account": {
+        "user_id": "anptdt2003",
+        "account_password": "$2a$10$VqMbyrPmS1ZyQaZTukmPZu/IAz/OIziYWYJQUM1l3.qpkwlNz35eq",
+        "default_password": "temp_password_456",
+        "is_locked": false,
+        "last_login": "2024-08-20T09:00:00.000Z",
+        "failed_login_attempts": 0
+      },
+      "student": {
+        "user_id": "anptdt2003",
+        "class_id": "admintoichoi",
+        "enrollments": [],
+        "grades": []
+      },
+      "notifications": [],
+      "change_history": [],
+      "tokens": {
+        "accessToken": null,
+        "refreshToken": null
+      }
+    },
+    {
+      "user_id": "admintoichoi",
+      "user_name": "AdminUser",
+      "image_url": "https://example.com/images/adminuser.jpg",
+      "gender": "Male",
+      "role": "Admin",
+      "school_email": "adminuser@school.edu",
+      "personal_email": "adminuser@gmail.com",
+      "contact_no": "0765432189",
+      "citizen_id": "876543210987",
+      "ethnicity": "African",
+      "date_of_birth": "1975-02-10T00:00:00.000Z",
+      "faculty_id": "anptdt2003",
+      "created_at": "2024-08-01T09:30:00.000Z",
+      "updated_at": "2024-08-22T09:30:00.000Z",
+      "sessions": [],
+      "account": {
+        "user_id": "admintoichoi",
+        "account_password": "$2a$10$YqM.UyFseHzUgFfNCxtEIOOTzEFZjXEZfDKHyYGc9HLOcdItK4XZm",
+        "default_password": "temp_password_789",
+        "is_locked": true,
+        "last_login": "2024-07-25T10:00:00.000Z",
+        "failed_login_attempts": 3
+      },
+      "admin": {
+        "user_id": "admintoichoi"
+      },
+      "notifications": [],
+      "change_history": [],
+      "tokens": {
+        "accessToken": null,
+        "refreshToken": null
+      }
+    }
+  ]
+}
