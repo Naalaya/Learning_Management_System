@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('password')->nullable()->comment('Mật khẩu đăng nhập');
             $table->string('phone', 10)->nullable()->comment('Số điện thoại');
             $table->string('name', 255)->comment('Tên học sinh');
+            $table->string('profile_id', 12)->nullable()->comment('CMND/CCCD');
             $table->string('email', 255)->nullable()->comment('Email học sinh');
             $table->string('avatar', 255)->nullable()->comment('Hình đại diện học sinh');
             $table->tinyInteger('gender')->comment('Giới tính. 1: male, 2: female');

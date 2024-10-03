@@ -22,6 +22,7 @@ class StudentInfoResource extends JsonResource
             'password'      => $this->password,
             'phone'         => $this->phone,
             'name'          => $this->name,
+            'profile_id'    => $this->profile_id,
             'email'         => $this->email,
             'avatar'        => $this->avatar,
             'gender'        => $this->gender,

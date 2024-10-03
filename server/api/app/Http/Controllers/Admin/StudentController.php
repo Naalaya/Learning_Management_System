@@ -104,6 +104,7 @@ class StudentController extends Controller
             $recordStudent->password      = bcrypt($request->code);
             $recordStudent->phone         = $request->phone;
             $recordStudent->name          = $request->name;
+            $recordStudent->profile_id    = $request->profile_id;
             $recordStudent->email         = $request->email;
             $recordStudent->avatar        = $request->avatar;
             $recordStudent->gender        = $request->gender;

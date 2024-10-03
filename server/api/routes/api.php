@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\Admin\StudentController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Student\AuthController as StudentAuthController;
+use App\Http\Controllers\{
+    Admin\StudentController,
+    AuthController,
+    Student\AuthController as StudentAuthController,
+    LocationController
+};
 
 Route::prefix('admin')->group(function() {
     // Admin authentication
@@ -42,4 +45,11 @@ Route::prefix('student')->group(function() {
         Route::get('/info', 'info')->middleware(['auth:sanctum', 'student']);
         Route::get('/logout', 'logout')->middleware(['auth:sanctum', 'student']);
     });
+});
+
+// Location
+Route::controller(LocationController::class)->group(function () {
+    Route::get('/province', 'province');
+    Route::get('/district/{provinceId}', 'district');
+    Route::get('/ward/{districtId}', 'ward');
 });

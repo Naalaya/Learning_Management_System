@@ -20,6 +20,8 @@ class StudentListResource extends JsonResource
             'code'          => $this->code,
             'avatar'        => $this->avatar,
             'joined_date'   => $this->joined_date,
+            'address'       => $this->address,
+            'phone'         => $this->phone,
         ];
     }
 }
