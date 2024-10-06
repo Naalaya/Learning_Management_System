@@ -1,14 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { deleteStudents } from "@/app/api/actions";
+import { useToast } from "@/components/ui/use-toast";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useState } from "react";
 
 // USE LAZY LOADING
-
-// import TeacherForm from "./forms/TeacherForm";
-// import StudentForm from "./forms/StudentForm";
 
 const TeacherForm = dynamic(() => import("./forms/teacherForm"), {
   loading: () => <h1>Loading...</h1>,
@@ -17,11 +15,22 @@ const StudentForm = dynamic(() => import("./forms/studentForm"), {
   loading: () => <h1>Loading...</h1>,
 });
 
-const forms: {
-  [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
-} = {
-  teacher: (type, data) => <TeacherForm type={type} data={data} />,
-  student: (type, data) => <StudentForm type={type} data={data} />,
+const forms = {
+  teacher: (type: any, data: any) => <TeacherForm type={type} data={data} />,
+  student: (type: any, data: any) => <StudentForm type={type} data={data} />,
+};
+
+const deleteStudent = async (studentID: number) => {
+  try {
+    const { success } = await deleteStudents(studentID.toString());
+    if (success) {
+      return { sucess: true };
+    } else {
+      return { success: false };
+    }
+  } catch (error) {
+    return { success: false };
+  }
 };
 
 const FormModal = ({
@@ -30,47 +39,81 @@ const FormModal = ({
   data,
   id,
 }: {
-  table: "teacher" | "student";
+  table:
+    | "teacher"
+    | "student"
+    | "parent"
+    | "subject"
+    | "class"
+    | "lesson"
+    | "exam"
+    | "assignment"
+    | "result"
+    | "attendance"
+    | "event"
+    | "announcement";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
 }) => {
-  const size = type === "create" ? "h-10 w-10" : "h-7 w-7";
+  const [open, setOpen] = useState(false);
+  const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
   const bgColor =
     type === "create"
       ? "bg-lamaYellow"
       : type === "update"
       ? "bg-lamaSky"
       : "bg-lamaPurple";
-
-  const [open, setOpen] = useState(false);
-
+  const { toast } = useToast();
   const Form = () => {
-    return type === "delete" && id ? (
-      <form action="" className="p-4 flex flex-col gap-4">
-        <span className="text-center font-medium">
-          All data will be lost. Are you sure you want to delete this {table}?
-        </span>
-        <button className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center">
-          Delete
-        </button>
-      </form>
-    ) : type === "create" || type === "update" ? (
-      forms[table](type, data)
-    ) : (
-      "Form not found!"
-    );
+    if (type === "delete" && id) {
+      return (
+        <form className="p-4 flex flex-col gap-4">
+          <span className="text-center font-medium">
+            Bạn có chắc chắn xoá {table} này chứ?
+          </span>
+          <button
+            className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+            onClick={async () => {
+              // Changed to async
+              const { success } = await deleteStudent(id);
+              if (!success) {
+                toast({
+                  title: "Đã có lỗi xảy ra",
+                  description: `Không thể xoá ${table} này`,
+                  variant: "destructive",
+                });
+              }
+              toast({
+                title: `Xoá thành công ${table}`,
+                variant: "success",
+              });
+              window.location.reload();
+            }}
+          >
+            Delete
+          </button>
+        </form>
+      );
+    } else if (type === "create" || type === "update") {
+      if (table in forms) {
+        // Check if table is a valid key
+        return forms[table as keyof typeof forms](type, data); // Type assertion added
+      } else {
+        return "Form not found for the specified table!";
+      }
+    } else {
+      return "Form not found!";
+    }
   };
 
   return (
     <div>
       <button
-        className={`${size} flex items-center justify-center rounded-md ${bgColor} hover:bg-lamaPurple`}
+        className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
         onClick={() => setOpen(true)}
       >
-        {/* <Image src={`/${type}.png`} alt="" width={16} height={16} /> */}
-
-        <Plus className="h-4 w-4" />
+        <Image src={`/${type}.png`} alt="" width={16} height={16} />
       </button>
       {open && (
         <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
@@ -80,9 +123,7 @@ const FormModal = ({
               className="absolute top-4 right-4 cursor-pointer"
               onClick={() => setOpen(false)}
             >
-              <Button size="icon">
-                <X className="h-4 w-4" />
-              </Button>
+              <Image src="/close.png" alt="" width={14} height={14} />
             </div>
           </div>
         </div>
