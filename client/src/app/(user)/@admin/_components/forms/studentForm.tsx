@@ -1,7 +1,7 @@
 "use client";
 
-import { province, district, ward } from "../address";
-import { createStudent } from "@/app/(user)/actions";
+import { province, district, ward } from "../../../../api/address";
+import { createStudent } from "@/app/api/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -156,11 +156,12 @@ export default function StudentProfileForm({
       password: values.profile_id,
       avatar: avatar || undefined,
     };
-    const response = await createStudent(submitData);
-    if (response.ok) {
-      console.log("Tạo hồ sơ sinh viên thành công");
+    // WTF, check it
+    const { success, result, message } = await createStudent(submitData);
+    if (success) {
+      alert(result);
     } else {
-      console.log("Tạo hồ sơ sinh viên thất bại");
+      alert(message);
     }
   }
 

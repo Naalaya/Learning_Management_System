@@ -49,3 +49,50 @@ export const createStudent = async (Form: any) => {
     : Promise.reject("No token found");
   redirect("/students");
 };
+// export const deleteStudents = async (studentID: string) => {
+//   const cookieStore = cookies();
+//   const token = cookieStore.get("token")?.value;
+//   token
+//     ? await fetch(`${process.env.API_URL_ADMIN}/student/${studentID}`, {
+//         method: "DELETE",
+//         headers: {
+//           "Content-Type": "application/json",
+//           Accept: "application/json",
+//           Authorization: `Bearer ${token}`,
+//         },
+//       }).then((response) =>
+//         response.ok
+//           ? response.json().then((data) => ({
+//               success: true,
+//               result: data.result,
+//             }))
+//           : Promise.resolve({ success: false })
+//       )
+//     : Promise.reject("No token found");
+// };
+
+export const deleteStudents = async (studentID: string) => {
+  const cookieStore = cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return Promise.reject("No token found");
+
+  const response = await fetch(
+    `${process.env.API_URL_ADMIN}/student/${studentID}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (response.ok) {
+    const data = await response.json();
+    return { success: true, result: data.result }; // Return success object
+  } else {
+    return { success: false }; // Return failure object
+  }
+};
