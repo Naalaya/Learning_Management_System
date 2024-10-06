@@ -1,6 +1,6 @@
 "use client";
 
-import { onLogout } from "../../actions";
+import { onLogout } from "../../../api/actions";
 import { NavItems } from "./navItems";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@nextui-org/react";

@@ -1,8 +1,7 @@
+import { students } from "../../../api/listStudent";
 import FormModal from "../_components/formModal";
-import { students } from "./seed";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, SlidersHorizontal, Plus, Eye, Trash2 } from "lucide-react";
+import { Search, Eye } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -30,19 +29,24 @@ export default async function StudentPage() {
       studentData = response.result as Student[];
     }
   }
-
   return (
     <div className="container mx-auto p-4 w-full">
-      <h1 className="text-2xl font-bold mb-4">Tất Cả Sinh Viên</h1>
+      <h1 className="text-2xl font-bold mb-4">Danh Sách Sinh Viên</h1>
       <div className="flex justify-between items-center mb-4">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
           <Input className="pl-8" placeholder="Tìm kiếm..." />
         </div>
         <div className="space-x-2 flex">
-          <Button variant="outline" size="icon">
+          {/* <Button variant="outline" size="icon" className="rounded-full">
             <SlidersHorizontal className="h-4 w-4" />
-          </Button>
+          </Button> */}
+          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+            <Image src="/filter.png" alt="" width={14} height={14} />
+          </button>
+          <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
+            <Image src="/sort.png" alt="" width={14} height={14} />
+          </button>
           {/* <CreateStudentModal type="create" /> */}
           {/* <Button size="icon">
             <Plus className="h-4 w-4" />
@@ -110,16 +114,18 @@ export default async function StudentPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {student.address}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex">
                   <Link
                     href={`/students/${student.id}`}
                     className="text-indigo-600 hover:text-indigo-900 mr-2"
                   >
-                    <Eye className="inline-block h-5 w-5" />
+                    <Eye className="inline-block h-7 w-7" />
                   </Link>
-                  <button className="text-red-600 hover:text-red-900">
-                    <Trash2 className="inline-block h-5 w-5" />
-                  </button>
+                  <button
+                    className="text-red-600 hover:text-red-900"
+                    // onClick={() => onDelete(student.id)}
+                  ></button>
+                  <FormModal table="student" type="delete" id={student.id} />
                 </td>
               </tr>
             ))}

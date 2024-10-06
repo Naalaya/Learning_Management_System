@@ -1,24 +1,27 @@
-import { cookies } from "next/headers";
+import { students } from "@/app/api/listStudent";
 
-export const students = async () => {
-  const cookieStore = cookies();
-  const token = cookieStore.get("token")?.value;
-  return token
-    ? fetch(`${process.env.API_URL_ADMIN}/student`, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) =>
-          response.ok
-            ? response.json().then((data) => ({
-                success: true,
-                result: data.result.items,
-              }))
-            : Promise.resolve({ success: false })
-        )
-        .catch(() => ({ success: false }))
-    : Promise.resolve(false); // Nếu không có token, trả về false
+type Student = {
+  id: number;
+  name: string;
+  code: string;
+  avatar: string | null;
+  joined_date: string;
+  address: string;
+  phone: string;
+};
+export const studentList = async () => {
+  const response = await students();
+  let studentData: Student[] = [];
+
+  if (
+    typeof response === "object" &&
+    response !== null &&
+    "success" in response &&
+    response.success
+  ) {
+    if ("result" in response && Array.isArray(response.result)) {
+      studentData = response.result as Student[];
+    }
+  }
+  return studentData;
 };
