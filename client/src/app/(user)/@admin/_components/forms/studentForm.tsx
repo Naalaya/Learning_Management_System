@@ -2,6 +2,7 @@
 
 import { province, district, ward } from "../../../../api/address";
 import { createStudent } from "@/app/api/actions";
+import { uploadAvatar } from "@/app/api/upload/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadButton } from "@/utils/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -84,7 +86,6 @@ export default function StudentProfileForm({
   const [wards, setWards] = useState([]);
   const [avatar, setAvatar] = useState<string | undefined>(data?.avatar);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Get Default Values in input fields
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -156,13 +157,10 @@ export default function StudentProfileForm({
       password: values.profile_id,
       avatar: avatar || undefined,
     };
-    // WTF, check it
     const { success, result, message } = await createStudent(submitData);
-    if (success) {
-      alert(result);
-    } else {
-      alert(message);
-    }
+    return success
+      ? { success: success, message: result }
+      : { success: false, message: message };
   }
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,10 +168,10 @@ export default function StudentProfileForm({
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setAvatar(result);
-        form.setValue("avatar", result);
+      reader.onloadend = async () => {
+        const image = reader.result as string;
+        setAvatar(image);
+        form.setValue("avatar", image);
       };
       reader.readAsDataURL(file);
     }
@@ -205,6 +203,7 @@ export default function StudentProfileForm({
             </TabsList>
             <TabsContent value="personal" className="space-y-4 mt-4">
               {/* Avatar */}
+
               <div className="flex items-center space-x-4">
                 <Avatar
                   className="w-24 h-24 cursor-pointer"
@@ -215,7 +214,7 @@ export default function StudentProfileForm({
                     {form.getValues("name")?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
+                <div className="flex-col flex space-y-2">
                   <Label htmlFor="avatar">Ảnh Đại Diện</Label>
                   <Input
                     id="avatar"
@@ -225,6 +224,17 @@ export default function StudentProfileForm({
                     ref={fileInputRef}
                     onChange={handleAvatarChange}
                   />
+                  {/* <UploadButton
+                    endpoint="imageUploader"
+                    onClientUploadComplete={(res) => {
+                      // Do something with the response
+                      console.log("Files: ", res);
+                    }}
+                    onUploadError={(error: Error) => {
+                      // Do something with the error.
+                      alert(`ERROR! ${error.message}`);
+                    }}
+                  /> */}
                   <Button
                     type="button"
                     variant="outline"
