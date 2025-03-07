@@ -93,7 +93,9 @@ class StudentController extends Controller
             if (Student::where('phone', $request->phone)->exists()) {
                 throw new \Exception('Số điện thoại đã tồn tại. Vui lòng kiểm tra lại.', 409);
             }
-
+            if (Student::where('profile_id', $request->profile_id)->exists()) {
+                throw new \Exception('Số CCCD/CMT đã tồn tại. Vui lòng kiểm tra lại.', 409);
+            }
             if (Student::where('email', $request->email)->exists()) {
                 throw new \Exception('Email đã tồn tại. Vui lòng kiểm tra lại.', 409);
             }
