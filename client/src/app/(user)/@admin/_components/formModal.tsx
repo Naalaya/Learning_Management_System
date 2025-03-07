@@ -9,10 +9,10 @@ import { useState } from "react";
 // USE LAZY LOADING
 
 const TeacherForm = dynamic(() => import("./forms/teacherForm"), {
-  loading: () => <h1>Đang tải form, vui lòng chờ trong giây lát...</h1>,
+  loading: () => <h1>Đang tải, vui lòng chờ trong giây lát...</h1>,
 });
 const StudentForm = dynamic(() => import("./forms/studentForm"), {
-  loading: () => <h1>Đang tải form, vui lòng chờ trong giây lát...</h1>,
+  loading: () => <h1>Đang tải, vui lòng chờ trong giây lát...</h1>,
 });
 
 const forms = {
@@ -68,29 +68,40 @@ const FormModal = ({ table, type, data, id, name }: FormModalProps) => {
             Bạn có chắc chắn xoá {name} chứ?
           </span>
           <span className="text-center font-medium">
-            Mọi thông tin của {table} này sẽ bị xoá và không thể khôi phục
+            Mọi thông tin của {table === "student" ? "sinh viên" : "table"} này
+            sẽ bị xoá và không thể khôi phục
           </span>
-          <button
-            className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
-            onClick={async () => {
-              const { success } = await deleteStudent(id);
-              if (!success) {
-                toast({
-                  title: "Đã có lỗi xảy ra",
-                  description: `Không thể xoá ${table} này`,
-                  variant: "destructive",
-                });
-              } else {
-                toast({
-                  title: `Xoá thành công`,
-                  variant: "success",
-                });
+          <div className="flex gap-2 justify-center items-center">
+            <button
+              className="bg-red-700 text-white py-2 px-4 rounded-md border-none w-max self-center"
+              onClick={async () => {
+                const { success } = await deleteStudent(id);
+                if (!success) {
+                  toast({
+                    title: "Đã có lỗi xảy ra",
+                    description: `Không thể xoá ${table} này`,
+                    variant: "destructive",
+                  });
+                } else {
+                  toast({
+                    title: `Xoá thành công`,
+                    variant: "success",
+                  });
+                  setOpen(false);
+                }
+              }}
+            >
+              Xoá
+            </button>
+            <button
+              className="bg-gray-100 py-2 px-4 rounded-md border-none w-max self-center"
+              onClick={() => {
                 setOpen(false);
-              }
-            }}
-          >
-            Delete
-          </button>
+              }}
+            >
+              Huỷ
+            </button>
+          </div>
         </form>
       );
     } else if (type === "create" || type === "update") {
@@ -119,15 +130,15 @@ const FormModal = ({ table, type, data, id, name }: FormModalProps) => {
       {open && (
         <div
           className="absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center w-full h-full"
-          onClick={() => setOpen(false)} // Đóng modal khi nhấp vào lớp phủ
-          style={{ pointerEvents: "auto" }} // Đảm bảo lớp phủ nhận sự kiện
+          onClick={() => setOpen(false)}
+          style={{ pointerEvents: "auto" }}
         >
           <div
             className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]"
             onClick={(e) => {
-              e.stopPropagation(); // Ngăn chặn sự kiện nổi bọt trong modal
+              e.stopPropagation();
             }}
-            style={{ pointerEvents: "auto" }} // Đảm bảo modal nhận sự kiện
+            style={{ pointerEvents: "auto" }}
           >
             <Form />
             <div

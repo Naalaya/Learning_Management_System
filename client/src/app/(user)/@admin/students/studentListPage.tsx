@@ -62,9 +62,9 @@ const StudentPage = ({
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-gray-200 ">
             {data.map((student) => (
-              <tr key={student.id} className="hover:bg-lamaPurpleLight">
+              <tr key={student.id} className="hover:bg-lamaPurpleLight ">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-10 w-10">
@@ -100,7 +100,8 @@ const StudentPage = ({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex">
                   <Link
-                    href={`/students/${student.id}`}
+                    // href={`/students/${student.id}`}
+                    href={`http://localhost:3001/list/teachers/1`}
                     className="text-indigo-600 hover:text-indigo-900 mr-2"
                   >
                     <Eye className="inline-block h-7 w-7" />
@@ -127,8 +128,8 @@ export default async function StudentPageContainer(page: any) {
     "success" in response &&
     response.success
   ) {
-    if ("result" in response && Array.isArray(response.result)) {
-      studentData = response.result as Student[];
+    if ("result" in response && Array.isArray((response.result as any).items)) {
+      studentData = (response.result as any).items as Student[];
     }
   }
 

@@ -11,7 +11,19 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "utfs.io",
-        pathname: `/a/${process.env.UPLOADTHING_TOKEN}`,
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ufs.sh",
+        port: "",
+        pathname: "/f/**",
+      },
+      {
+        protocol: "https",
+        hostname: "bluemoji.io",
+        pathname: "/cdn-proxy/**",
       },
     ],
   },
