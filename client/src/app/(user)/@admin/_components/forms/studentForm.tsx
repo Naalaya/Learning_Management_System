@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useUploadThing } from "@/utils/uploadthing";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -56,13 +57,7 @@ const formSchema = z.object({
   avatar: z.string().optional(),
   gender: z.enum(["1", "2"], { message: "Vui lòng chọn giới tính" }),
   birthday: z.string().min(1, { message: "Vui lòng nhập ngày sinh" }),
-  // .refine((value) => value !== null, {
-  //   message: "Vui lòng nhập đầy đủ thông tin ngày sinh",
-  // })
   joined_date: z.string().min(1, { message: "Vui lòng nhập ngày sinh" }),
-  // .refine((value) => value !== null, {
-  //   message: "Vui lòng nhập ngày nhập học",
-  // })
   address: z.string().min(1, "Vui lòng nhập địa chỉ"),
   province_id: z.string().min(1, { message: "Vui lòng chọn tỉnh/thành phố" }),
   district_id: z.string().min(1, { message: "Vui lòng chọn quận/huyện" }),
@@ -81,11 +76,23 @@ export default function StudentProfileForm({
 }) {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
+  const [files, setFiles] = useState([]);
+  const [ufsUrl, setUfsUrl] = useState<string>("");
   const [wards, setWards] = useState([]);
   const [avatar, setAvatar] = useState<string | undefined>(data?.avatar);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Get Default Values in input fields
+  const { startUpload, isUploading } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (res) => {
+      if (res?.[0]) {
+        setUfsUrl(res[0].ufsUrl);
+        console.log("Upload completed, URL:", res[0].ufsUrl);
+      }
+    },
+    onUploadError: (err) => {
+      console.error(err);
+    },
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -110,7 +117,6 @@ export default function StudentProfileForm({
     },
   });
 
-  // Fetch Provinces
   useEffect(() => {
     const fetchProvinces = async () => {
       const response = await province();
@@ -121,7 +127,7 @@ export default function StudentProfileForm({
 
     fetchProvinces();
   }, []);
-  // Fetch Districts
+
   useEffect(() => {
     const selectedProvinceId = form.watch("province_id");
     if (selectedProvinceId) {
@@ -135,7 +141,7 @@ export default function StudentProfileForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch("province_id")]);
-  // Fetch wards
+
   useEffect(() => {
     const selectedDistrictId = form.watch("district_id");
     if (selectedDistrictId) {
@@ -150,33 +156,53 @@ export default function StudentProfileForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch("district_id")]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const submitData = {
-      ...values,
-      password: values.profile_id,
-      avatar: avatar || undefined,
-    };
-    // WTF, check it
-    const { success, result, message } = await createStudent(submitData);
-    if (success) {
-      alert(result);
-    } else {
-      alert(message);
-    }
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      if (files.length > 0) {
+        const uploadResult = await startUpload(files);
+        if (uploadResult?.[0]?.ufsUrl) {
+          const submitData = {
+            ...values,
+            password: values.profile_id,
+            avatar: uploadResult[0].ufsUrl,
+          };
+          const { success, result, message } = await createStudent(submitData);
+          setFiles([]);
 
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // use Uploadthing to store Image and get its response address
+          if (success) {
+            alert("success");
+          } else {
+            alert("false");
+          }
+          return success
+            ? { success: success, message: result }
+            : { success: false, message: message };
+        }
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      return { success: false, message: "Upload failed" };
+    } finally {
+      setFiles([]);
+    }
+  };
+
+  const handleAvatarChange = (event: any) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setAvatar(result);
-        form.setValue("avatar", result);
+      reader.onloadend = async () => {
+        const image = reader.result as string;
+        setAvatar(image);
+        form.setValue("avatar", image);
       };
       reader.readAsDataURL(file);
     }
+    const fileList = event.target.files;
+    if (fileList) {
+      setFiles(Array.from(fileList));
+    }
+    console.log(JSON.stringify(files));
   };
 
   return (
@@ -193,7 +219,6 @@ export default function StudentProfileForm({
             : "Cập nhật hồ sơ sinh viên"}
         </CardDescription>
       </CardHeader>
-      {/* Card */}
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <Tabs defaultValue="personal" className="w-full">
@@ -204,7 +229,6 @@ export default function StudentProfileForm({
               <TabsTrigger value="other">Thông Tin Khác</TabsTrigger>
             </TabsList>
             <TabsContent value="personal" className="space-y-4 mt-4">
-              {/* Avatar */}
               <div className="flex items-center space-x-4">
                 <Avatar
                   className="w-24 h-24 cursor-pointer"
@@ -215,7 +239,7 @@ export default function StudentProfileForm({
                     {form.getValues("name")?.charAt(0) || "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1 space-y-2">
+                <div className="flex-col flex space-y-2">
                   <Label htmlFor="avatar">Ảnh Đại Diện</Label>
                   <Input
                     id="avatar"
@@ -249,7 +273,6 @@ export default function StudentProfileForm({
                     </p>
                   )}
                 </div>
-                {/* Default Information */}
                 <div className="space-y-2">
                   <Label htmlFor="code">Mã Số Sinh Viên</Label>
                   <Input
@@ -284,20 +307,7 @@ export default function StudentProfileForm({
                     placeholder="Mã Giảng Viên Chủ Nhiệm"
                   />
                 </div>
-                {/* <div className="space-y-2">
-                  <TabsContent value="teacher_id" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="data">Mã Chủ Nhiệm</Label>
-                      <Textarea
-                        id="teacher_id"
-                        {...form.register("teacher_id")}
-                        placeholder="Nhập dữ liệu bổ sung (nếu có)"
-                      />
-                    </div>
-                  </TabsContent>
-                </div> */}
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Ngày Sinh</Label>
@@ -308,7 +318,6 @@ export default function StudentProfileForm({
                     </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label>Ngày Nhập Học</Label>
                   <Input type="date" {...form.register("joined_date")} />
@@ -369,7 +378,6 @@ export default function StudentProfileForm({
                 </div>
               </div>
             </TabsContent>
-            {/* Contact */}
             <TabsContent value="contact" className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Số Điện Thoại</Label>
@@ -380,7 +388,6 @@ export default function StudentProfileForm({
                   </p>
                 )}
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" {...form.register("email")} />
@@ -391,7 +398,6 @@ export default function StudentProfileForm({
                 )}
               </div>
             </TabsContent>
-            {/* Address */}
             <TabsContent value="address" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -422,7 +428,6 @@ export default function StudentProfileForm({
                     </p>
                   )}
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="district_id">Quận/Huyện</Label>
                   <Select
@@ -475,7 +480,6 @@ export default function StudentProfileForm({
                   )}
                 </div>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="address">Địa Chỉ</Label>
                 <Input id="address" {...form.register("address")} />
@@ -497,14 +501,9 @@ export default function StudentProfileForm({
               </div>
             </TabsContent>
           </Tabs>
-
-          <Button
-            type="submit"
-            className="w-full"
-            // disabled={form.formState.isSubmitting}
-          >
+          <Button type="submit" className="w-full">
             {form.formState.isSubmitting ? (
-              <span>
+              <span className="flex">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Đang tạo hồ sơ...
               </span>
